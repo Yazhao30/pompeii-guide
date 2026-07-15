@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#9a3d22" />
+  <meta name="description" content="庞贝古城中文定位导览：地图、附近地点、建筑讲解与路线。" />
+  <title>庞贝随行导览</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+  <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">POMPEII · 中文随行导览</p>
+        <h1>庞贝随行导览</h1>
+      </div>
+      <button id="installBtn" class="icon-btn hidden" aria-label="安装到手机">＋</button>
+    </header>
+
+    <section class="status-strip" aria-live="polite">
+      <span id="gpsDot" class="gps-dot"></span>
+      <span id="gpsStatus">尚未开启定位</span>
+      <button id="locateBtn" class="text-btn">开启定位</button>
+    </section>
+
+    <main>
+      <section id="mapView" class="view active" aria-label="地图">
+        <div id="map"></div>
+        <div class="map-actions">
+          <button id="recenterBtn" class="floating-btn" aria-label="回到我的位置">◎</button>
+          <button id="fitBtn" class="floating-btn" aria-label="显示全部地点">⌗</button>
+        </div>
+        <aside id="nearestCard" class="nearest-card hidden"></aside>
+      </section>
+
+      <section id="placesView" class="view panel-view">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">按距离或名称查找</p>
+            <h2>地点</h2>
+          </div>
+          <select id="categoryFilter" aria-label="地点分类">
+            <option value="all">全部</option>
+            <option value="public">公共空间</option>
+            <option value="house">宅邸</option>
+            <option value="religion">神庙</option>
+            <option value="leisure">休闲娱乐</option>
+            <option value="daily">日常生活</option>
+            <option value="entrance">入口与服务</option>
+          </select>
+        </div>
+        <label class="search-box">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="搜索：农牧神之家、剧场、浴场……" autocomplete="off" />
+        </label>
+        <div id="placesList" class="cards"></div>
+      </section>
+
+      <section id="routesView" class="view panel-view">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">根据体力和入口选择</p>
+            <h2>推荐路线</h2>
+          </div>
+        </div>
+        <div id="routeCards" class="route-cards"></div>
+        <div class="tip-card">
+          <strong>现场提醒</strong>
+          <p>建筑开放状态可能临时调整。地图用于现场定向，不替代园区标识和工作人员指引。石板路高低不平，建议穿防滑、包裹性较好的鞋。</p>
+        </div>
+      </section>
+
+      <section id="savedView" class="view panel-view">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">保存在本机</p>
+            <h2>收藏与足迹</h2>
+          </div>
+        </div>
+        <div class="progress-card">
+          <div>
+            <span>已到访</span>
+            <strong id="visitedCount">0</strong>
+          </div>
+          <div>
+            <span>已收藏</span>
+            <strong id="favoriteCount">0</strong>
+          </div>
+        </div>
+        <h3>收藏地点</h3>
+        <div id="savedList" class="cards"></div>
+      </section>
+
+      <section id="infoView" class="view panel-view">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">使用与资料</p>
+            <h2>说明</h2>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>怎么用</h3>
+          <ol>
+            <li>到达园区后点击“开启定位”，允许浏览器访问位置。</li>
+            <li>地图会显示你的实时位置，并把最近地点放在地图下方。</li>
+            <li>点击地图标记或地点卡片，查看中文讲解、观察重点和方向距离。</li>
+            <li>点击“标记到访”保存足迹；点击星标加入收藏。</li>
+          </ol>
+        </div>
+        <div class="info-card">
+          <h3>定位说明</h3>
+          <p>古城内建筑密集，手机 GPS 可能有约 5–25 米误差。请结合建筑门牌、Regio/Insula 编号和现场标识确认位置。应用中的“导航”以方向和直线距离为主，避免把你引入封闭道路。</p>
+        </div>
+        <div class="info-card">
+          <h3>资料来源</h3>
+          <p>地点选择和讲解依据庞贝考古公园官方地图、官方参观指南与开放建筑列表重新整理；底图来自 OpenStreetMap。应用为个人旅行辅助工具，不是庞贝考古公园官方产品。</p>
+          <details>
+            <summary>查看链接</summary>
+            <p class="source-links">
+              <a href="https://pompeiisites.org/en/visiting-info/map-and-guide-to-the-excavations/" target="_blank" rel="noreferrer">官方地图与指南</a>
+              <a href="https://pompeiisites.org/en/houses/" target="_blank" rel="noreferrer">开放建筑列表</a>
+              <a href="https://pompeiisites.org/en/paths/" target="_blank" rel="noreferrer">官方推荐路线</a>
+            </p>
+          </details>
+        </div>
+        <div class="info-card warning">
+          <h3>音频提示</h3>
+          <p>本版本只提供文字讲解，没有自动语音播放。园区对现场语音导览设备有专门规定，请以官方最新规则为准。</p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主导航">
+      <button class="nav-btn active" data-view="mapView"><span>⌖</span>地图</button>
+      <button class="nav-btn" data-view="placesView"><span>▦</span>地点</button>
+      <button class="nav-btn" data-view="routesView"><span>↝</span>路线</button>
+      <button class="nav-btn" data-view="savedView"><span>☆</span>收藏</button>
+      <button class="nav-btn" data-view="infoView"><span>i</span>说明</button>
+    </nav>
+  </div>
+
+  <dialog id="detailDialog" class="detail-dialog">
+    <div class="dialog-shell">
+      <button id="closeDialog" class="close-btn" aria-label="关闭">×</button>
+      <div id="detailContent"></div>
+    </div>
+  </dialog>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "庞贝随行导览",
+  "short_name": "庞贝导览",
+  "description": "庞贝古城中文定位导览：地图、附近地点、建筑讲解与路线。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffdf8",
+  "theme_color": "#9a3d22",
+  "lang": "zh-CN",
+  "icons": [
+    {"src":"icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
